@@ -1,7 +1,7 @@
-from dotenv import load_dotenv
+
 import os
-from typing import TypedDict, Annotated
-import operator
+from typing import TypedDict, Annotated, cast
+from dotenv import load_dotenv
 
 # Load the .env file from the project root
 dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
@@ -9,40 +9,40 @@ load_dotenv(dotenv_path=dotenv_path)
 
 import argparse
 import google.generativeai as genai
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 from langgraph.graph import StateGraph, END
+from llm_provider import get_llm
 
 class GraphState(TypedDict):
     location: str
     country: str
 
-def list_models():
+def list_models() -> None:
     """Lists available Gemini models."""
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
     for m in genai.list_models():
         if 'generateContent' in m.supported_generation_methods:
             print(m.name)
 
-def get_gemini_response(location):
+def get_gemini_response(location: str) -> str:
     """
     Gets a country name if the location is in a country, otherwise 'Invalid Input'.
     """
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.getenv("GEMINI_API_KEY"))
+    llm = get_llm()
 
-    def call_model(state):
+    def get_country_name(state: GraphState) -> dict[str, str]:
         prompt = f"If the following location: '{state['location']}' is in a country, return only the country name. Otherwise, just output 'Invalid Input'."
         message = HumanMessage(content=prompt)
         response = llm.invoke([message])
-        return {"country": response.content}
+        return {"country": str(response.content)}
 
     workflow = StateGraph(GraphState)
-    workflow.add_node("call_model", call_model)
-    workflow.set_entry_point("call_model")
-    workflow.add_edge("call_model", END)
+    workflow.add_node("get_country_name", get_country_name)
+    workflow.set_entry_point("get_country_name")
+    workflow.add_edge("get_country_name", END)
     app = workflow.compile()
 
-    final_state = app.invoke({"location": location})
+    final_state = app.invoke(cast(GraphState, {"location": location}))
     return final_state['country']
 
 if __name__ == "__main__":
