@@ -24,7 +24,7 @@ def list_models() -> None:
         if 'generateContent' in m.supported_generation_methods:
             print(m.name)
 
-def get_gemini_response(location: str) -> str:
+def find_country_name(location: str) -> str:
     """
     Gets a country name if the location is in a country, otherwise 'Invalid Input'.
     """
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         if args.list_models:
             list_models()
         elif args.location:
-            gemini_response = get_gemini_response(args.location)
+            gemini_response = find_country_name(args.location)
             print(f"\033[92m{gemini_response}\033[0m")
         else:
             parser.print_help()

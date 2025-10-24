@@ -2,14 +2,15 @@ import argparse
 import os
 import re
 from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage
-from langgraph.graph import StateGraph, END
-from typing import TypedDict, cast
-from llm_provider import get_llm
 
 # Load the .env file from the project root
 dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
 load_dotenv(dotenv_path=dotenv_path)
+
+from langchain_core.messages import HumanMessage
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, cast
+from llm_provider import get_llm
 
 class GraphState(TypedDict):
     location: str
@@ -21,7 +22,8 @@ def find_itineraries(location: str, num_itinerary: int) -> str:
     llm = get_llm()
 
     def find_itineraries_node(state: GraphState) -> dict[str, str]:
-        prompt = f"Find {state['num_itinerary']} existing itineraries for '{state['location']}'. Return only the itemized itinerary links."
+        prompt = f"Find touristy activities of things to do in '{state['location']}'. I want an itemized list only."
+        print(prompt)
         message = HumanMessage(content=prompt)
         response = llm.invoke([message])
         return {"itineraries": str(response.content)}

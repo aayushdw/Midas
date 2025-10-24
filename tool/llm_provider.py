@@ -3,4 +3,4 @@ import os
 
 def get_llm() -> ChatGoogleGenerativeAI:
     """Initializes and returns the ChatGoogleGenerativeAI instance."""
-    return ChatGoogleGenerativeAI(model="gemini-2.5-pro", google_api_key=os.getenv("GEMINI_API_KEY"))
+    return ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.getenv("GEMINI_API_KEY"))
